@@ -17,9 +17,23 @@ namespace BlendShapeOrganizer
             public Group(string key, string name) { Key = key; Name = name; }
         }
 
+        [Serializable]
+        private sealed class ClipboardEntry
+        {
+            public string name;
+            public float weight;
+        }
+
+        [Serializable]
+        private sealed class ClipboardData
+        {
+            public ClipboardEntry[] shapes;
+        }
+
+        private const string ClipboardHeader = "GARGRIMM_BLEND_SHAPE_ORGANIZER_V1\n";
+
         // Accept one or more equals signs on each side, with optional whitespace.
         private static readonly Regex HeaderPattern = new Regex(@"^\s*=+\s*(.*?)\s*=+\s*$", RegexOptions.Compiled);
-        private static readonly Dictionary<string, float> copiedWeights = new Dictionary<string, float>(StringComparer.Ordinal);
         private readonly Dictionary<string, bool> expanded = new Dictionary<string, bool>();
         private SkinnedMeshRenderer targetRenderer;
         private Vector2 scroll;
@@ -91,10 +105,7 @@ namespace BlendShapeOrganizer
 
             EditorGUILayout.BeginHorizontal();
             if (GUILayout.Button("Copy weights")) CopyWeights(mesh);
-            using (new EditorGUI.DisabledScope(copiedWeights.Count == 0))
-            {
-                if (GUILayout.Button("Paste matching weights")) PasteWeights(mesh);
-            }
+            if (GUILayout.Button("Paste matching weights")) PasteWeights(mesh);
             EditorGUILayout.EndHorizontal();
             List<Group> groups = BuildGroups(mesh);
             string filter = search.Trim();
@@ -139,20 +150,62 @@ namespace BlendShapeOrganizer
 
         private void CopyWeights(Mesh mesh)
         {
-            copiedWeights.Clear();
+            var data = new ClipboardData { shapes = new ClipboardEntry[mesh.blendShapeCount] };
             for (int i = 0; i < mesh.blendShapeCount; i++)
-                copiedWeights[mesh.GetBlendShapeName(i)] = targetRenderer.GetBlendShapeWeight(i);
-            ShowNotification(new GUIContent("Copied " + copiedWeights.Count + " blend shapes"));
+            {
+                data.shapes[i] = new ClipboardEntry
+                {
+                    name = mesh.GetBlendShapeName(i),
+                    weight = targetRenderer.GetBlendShapeWeight(i)
+                };
+            }
+            EditorGUIUtility.systemCopyBuffer = ClipboardHeader + JsonUtility.ToJson(data);
+            ShowNotification(new GUIContent("Copied " + data.shapes.Length + " blend shapes to clipboard"));
         }
 
         private void PasteWeights(Mesh mesh)
         {
+            string clipboard = EditorGUIUtility.systemCopyBuffer;
+            if (string.IsNullOrEmpty(clipboard) || !clipboard.StartsWith(ClipboardHeader, StringComparison.Ordinal))
+            {
+                ShowNotification(new GUIContent("Clipboard does not contain Blend Shape Organizer data"));
+                return;
+            }
+
+            ClipboardData data;
+            try
+            {
+                data = JsonUtility.FromJson<ClipboardData>(clipboard.Substring(ClipboardHeader.Length));
+            }
+            catch (ArgumentException)
+            {
+                ShowNotification(new GUIContent("Invalid blend shape clipboard data"));
+                return;
+            }
+            if (data == null || data.shapes == null || data.shapes.Length == 0)
+            {
+                ShowNotification(new GUIContent("Invalid blend shape clipboard data"));
+                return;
+            }
+
+            var weights = new Dictionary<string, float>(StringComparer.Ordinal);
+            foreach (ClipboardEntry entry in data.shapes)
+            {
+                if (entry == null || string.IsNullOrEmpty(entry.name) ||
+                    float.IsNaN(entry.weight) || float.IsInfinity(entry.weight))
+                {
+                    ShowNotification(new GUIContent("Invalid blend shape clipboard data"));
+                    return;
+                }
+                weights[entry.name] = entry.weight;
+            }
+
             int matched = 0;
             bool recorded = false;
             for (int i = 0; i < mesh.blendShapeCount; i++)
             {
                 float weight;
-                if (!copiedWeights.TryGetValue(mesh.GetBlendShapeName(i), out weight)) continue;
+                if (!weights.TryGetValue(mesh.GetBlendShapeName(i), out weight)) continue;
                 if (!recorded)
                 {
                     Undo.RecordObject(targetRenderer, "Paste Blend Shape Weights");
@@ -168,6 +221,7 @@ namespace BlendShapeOrganizer
             }
             ShowNotification(new GUIContent("Pasted " + matched + " matching blend shapes"));
         }
+
         private static bool Contains(string value, string filter)
         {
             return value.IndexOf(filter, StringComparison.OrdinalIgnoreCase) >= 0;

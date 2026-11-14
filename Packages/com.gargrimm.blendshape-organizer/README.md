@@ -19,4 +19,4 @@ Open **Tools > Gargrimm > Blend Shape Organizer** and select an object with a Sk
 
 ## Copy weights to another object
 
-Select the source renderer and click **Copy weights**. Select or assign the destination renderer and click **Paste matching weights**. All blend shapes are copied regardless of the search filter or expanded groups. Names must match exactly, including case; unmatched names are skipped. Pasting supports Undo and reports the number of matches. Copied values are held in editor memory and are lost when scripts recompile or Unity restarts.
+Select the source renderer and click **Copy weights**. Select or assign the destination renderer and click **Paste matching weights**. All blend shapes are copied regardless of the search filter or expanded groups. Names must match exactly, including case; unmatched names are skipped. Pasting supports Undo and reports the number of matches. Values are serialized to the system clipboard with a plugin-specific header, so they can be pasted in another Unity project. Copying anything else replaces them. Invalid or unrecognized clipboard data is rejected.
