@@ -1,10 +1,16 @@
 name: Publish package and listing
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'Packages/**'
+      - 'scripts/**'
+      - '.github/workflows/publish.yml'
   workflow_dispatch:
     inputs:
       package:
-        description: Package folder in Packages (leave empty to rebuild only the listing)
+        description: Package folder to publish (leave empty to rebuild the listing only)
         required: false
         type: string
 
@@ -25,20 +31,12 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - name: Prepare package
-        if: inputs.package != ''
-        id: package
-        env:
-          PACKAGE_FOLDER: ${{ inputs.package }}
-        run: python3 scripts/build_package.py
-      - name: Publish release
-        if: inputs.package != ''
+      - name: Publish new package versions
+        if: github.event_name == 'push' || inputs.package != ''
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ steps.package.outputs.tag }}
-          ZIP_PATH: ${{ steps.package.outputs.zip_path }}
-          MANIFEST_PATH: ${{ steps.package.outputs.manifest_path }}
-        run: gh release create "$TAG" "$ZIP_PATH" "$MANIFEST_PATH" --title "$TAG" --generate-notes
+          PACKAGE_FOLDER: ${{ inputs.package }}
+        run: python3 scripts/publish_packages.py
       - name: Build listing
         env:
           GH_TOKEN: ${{ github.token }}
@@ -50,4 +48,3 @@ jobs:
       - name: Publish listing to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
