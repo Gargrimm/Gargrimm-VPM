@@ -4,7 +4,7 @@ An editor tool to disable Rim Light and Backlight on multiple lilToon materials 
 
 ## Installation
 
-Install the package from the Gargrimm VPM listing in VCC or ALCOM, or install it locally by selecting `package.json` under **Window > Package Manager > + > Add package from disk...**. Open **Tools > lilToon > Light Cleaner**.
+Install the package from the Gargrimm VPM listing in VCC or ALCOM, or install it locally by selecting `package.json` under **Window > Package Manager > + > Add package from disk...**. Open **Tools > Gargrimm > lilToon Light Cleaner**.
 
 ## Usage
 

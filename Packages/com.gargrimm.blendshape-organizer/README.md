@@ -8,7 +8,7 @@ Install the package from the Gargrimm VPM listing in VCC or ALCOM, or add it as 
 
 ## Usage
 
-Open **Window > Blend Shape Organizer** and select an object with a Skinned Mesh Renderer. You can also open the window from the component's context menu using **Open Blend Shape Organizer**. Disable **Follow selection** or assign a component manually to keep it selected.
+Open **Tools > Gargrimm > Blend Shape Organizer** and select an object with a Skinned Mesh Renderer. Disable **Follow selection** or assign a component manually to keep it selected.
 
 - Search for blend shape or group names without case sensitivity.
 - Names such as `= Face =` or `=== Face ===` start a group. Subsequent blend shapes belong to it until the next marker.

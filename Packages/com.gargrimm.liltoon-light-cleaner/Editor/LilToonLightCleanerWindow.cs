@@ -15,7 +15,7 @@ namespace LilToonLightCleaner.Editor
         private bool removeBacklight = true;
         private string status = "";
 
-        [MenuItem("Tools/lilToon/Light Cleaner")]
+        [MenuItem("Tools/Gargrimm/lilToon Light Cleaner")]
         private static void Open()
         {
             GetWindow<LilToonLightCleanerWindow>("lilToon Cleaner");

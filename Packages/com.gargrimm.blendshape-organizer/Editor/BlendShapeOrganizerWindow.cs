@@ -26,19 +26,10 @@ namespace BlendShapeOrganizer
         private string search = string.Empty;
         private bool followSelection = true;
 
-        [MenuItem("Window/Blend Shape Organizer")]
+        [MenuItem("Tools/Gargrimm/Blend Shape Organizer")]
         private static void Open()
         {
             GetWindow<BlendShapeOrganizerWindow>("Blend Shapes").Show();
-        }
-
-        [MenuItem("CONTEXT/SkinnedMeshRenderer/Open Blend Shape Organizer")]
-        private static void OpenForRenderer(MenuCommand command)
-        {
-            var window = GetWindow<BlendShapeOrganizerWindow>("Blend Shapes");
-            window.targetRenderer = command.context as SkinnedMeshRenderer;
-            window.followSelection = false;
-            window.Show();
         }
 
         private void OnEnable()
