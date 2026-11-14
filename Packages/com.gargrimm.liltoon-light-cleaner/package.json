@@ -1,0 +1,15 @@
+{
+  "name": "com.gargrimm.liltoon-light-cleaner",
+  "version": "1.0.0",
+  "displayName": "lilToon Light Cleaner",
+  "description": "Disable Rim Light and Backlight on selected lilToon materials in bulk.",
+  "unity": "2021.3",
+  "keywords": [
+    "liltoon",
+    "materials",
+    "editor"
+  ],
+  "author": {
+    "name": "Gargrimm"
+  }
+}

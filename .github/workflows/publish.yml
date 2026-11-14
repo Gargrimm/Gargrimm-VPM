@@ -1,0 +1,53 @@
+name: Publish package and listing
+
+on:
+  workflow_dispatch:
+    inputs:
+      package:
+        description: Package folder in Packages (leave empty to rebuild only the listing)
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: gargrimm-vpm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare package
+        if: inputs.package != ''
+        id: package
+        env:
+          PACKAGE_FOLDER: ${{ inputs.package }}
+        run: python3 scripts/build_package.py
+      - name: Publish release
+        if: inputs.package != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.package.outputs.tag }}
+          ZIP_PATH: ${{ steps.package.outputs.zip_path }}
+          MANIFEST_PATH: ${{ steps.package.outputs.manifest_path }}
+        run: gh release create "$TAG" "$ZIP_PATH" "$MANIFEST_PATH" --title "$TAG" --generate-notes
+      - name: Build listing
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/build_listing.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - name: Publish listing to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
