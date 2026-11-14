@@ -11,7 +11,7 @@ Install the package from the Gargrimm VPM listing in VCC or ALCOM, or add it as 
 Open **Tools > Gargrimm > Blend Shape Organizer** and select an object with a Skinned Mesh Renderer. Disable **Follow selection** or assign a component manually to keep it selected.
 
 - Search for blend shape or group names without case sensitivity.
-- Names such as `= Face =` or `=== Face ===` start a group. Subsequent blend shapes belong to it until the next marker.
+- Names such as `= Face =`, `=== Face ===`, `- Face -`, or `--- Face ---` start a group. Subsequent blend shapes belong to it until the next marker.
 - Names beginning with `vrc.` appear in the **VRC** group without changing the current group.
 - Blend shapes before the first marker appear in **Ungrouped**.
 - Markers remain editable because they are also blend shapes. Groups with the same name are combined.

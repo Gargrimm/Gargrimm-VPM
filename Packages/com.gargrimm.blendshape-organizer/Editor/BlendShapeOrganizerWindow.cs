@@ -32,8 +32,8 @@ namespace BlendShapeOrganizer
 
         private const string ClipboardHeader = "GARGRIMM_BLEND_SHAPE_ORGANIZER_V1\n";
 
-        // Accept one or more equals signs on each side, with optional whitespace.
-        private static readonly Regex HeaderPattern = new Regex(@"^\s*=+\s*(.*?)\s*=+\s*$", RegexOptions.Compiled);
+        // Accept one or more matching separator characters on each side.
+        private static readonly Regex HeaderPattern = new Regex(@"^\s*(?:=+\s*(.*?)\s*=+|-+\s*(.*?)\s*-+)\s*$", RegexOptions.Compiled);
         private readonly Dictionary<string, bool> expanded = new Dictionary<string, bool>();
         private SkinnedMeshRenderer targetRenderer;
         private Vector2 scroll;
@@ -236,8 +236,12 @@ namespace BlendShapeOrganizer
             {
                 string name = mesh.GetBlendShapeName(i);
                 Match header = HeaderPattern.Match(name);
-                if (header.Success && !string.IsNullOrWhiteSpace(header.Groups[1].Value))
-                    current = GetGroup("header:" + header.Groups[1].Value.Trim(), header.Groups[1].Value.Trim(), groups, byName);
+                if (header.Success)
+                {
+                    string headerName = header.Groups[1].Success ? header.Groups[1].Value.Trim() : header.Groups[2].Value.Trim();
+                    if (!string.IsNullOrWhiteSpace(headerName))
+                        current = GetGroup("header:" + headerName, headerName, groups, byName);
+                }
 
                 // VRChat shapes always have their own group, without changing the current group.
                 Group destination = name.StartsWith("vrc.", StringComparison.OrdinalIgnoreCase)
