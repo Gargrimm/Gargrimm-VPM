@@ -23,15 +23,15 @@ namespace LilToonLightCleaner.Editor
 
         private void OnEnable()
         {
-            AddSelectedMaterials();
+            AddSelection();
         }
 
         private void OnGUI()
         {
             EditorGUILayout.LabelField("Disable lilToon lights", EditorStyles.boldLabel);
             EditorGUILayout.HelpBox(
-                "Add materials from the Project selection or drag them into this window. " +
-                "Only materials with the corresponding property will be modified.",
+                "Select or drag materials or GameObjects to collect their renderer materials, including inactive children. " +
+                "Changes affect shared material assets with the corresponding properties.",
                 MessageType.Info);
 
             removeRim = EditorGUILayout.ToggleLeft("Disable Rim Light (_UseRim)", removeRim);
@@ -39,7 +39,7 @@ namespace LilToonLightCleaner.Editor
 
             using (new EditorGUILayout.HorizontalScope())
             {
-                if (GUILayout.Button("Add Project selection")) AddSelectedMaterials();
+                if (GUILayout.Button("Add selection")) AddSelection();
                 if (GUILayout.Button("Clear list"))
                 {
                     materials.Clear();
@@ -78,7 +78,7 @@ namespace LilToonLightCleaner.Editor
         private void DrawDropArea()
         {
             Rect area = GUILayoutUtility.GetRect(0, 46, GUILayout.ExpandWidth(true));
-            GUI.Box(area, "Drag materials here", EditorStyles.helpBox);
+            GUI.Box(area, "Drag materials or GameObjects here", EditorStyles.helpBox);
 
             Event evt = Event.current;
             if (!area.Contains(evt.mousePosition)) return;
@@ -90,18 +90,32 @@ namespace LilToonLightCleaner.Editor
                 {
                     DragAndDrop.AcceptDrag();
                     foreach (Object item in DragAndDrop.objectReferences)
-                        if (item is Material material) AddMaterial(material);
+                        AddObject(item);
                 }
                 evt.Use();
             }
         }
 
-        private void AddSelectedMaterials()
+        private void AddSelection()
         {
             foreach (Object item in Selection.objects)
-                if (item is Material material) AddMaterial(material);
+                AddObject(item);
 
             Repaint();
+        }
+
+        private void AddObject(Object item)
+        {
+            if (item is Material material)
+            {
+                AddMaterial(material);
+            }
+            else if (item is GameObject gameObject)
+            {
+                foreach (Renderer renderer in gameObject.GetComponentsInChildren<Renderer>(true))
+                    foreach (Material sharedMaterial in renderer.sharedMaterials)
+                        AddMaterial(sharedMaterial);
+            }
         }
 
         private void AddMaterial(Material material)

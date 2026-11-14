@@ -8,8 +8,8 @@ Install the package from the Gargrimm VPM listing in VCC or ALCOM, or install it
 
 ## Usage
 
-- Select materials in the Project window and click **Add Project selection**, or drag them into the window.
+- Select materials or GameObjects and click **Add selection**, or drag them into the window. GameObjects contribute the shared materials of all renderers on themselves and their children, including inactive children. Duplicate materials are added only once.
 - Choose the options to disable and click **Disable on all materials**.
-- Changes support Undo and are saved to the assets.
+- Changes support Undo and are saved to the shared material assets, affecting every object that uses them.
 
 The tool sets `_UseRim` and `_UseBacklight` to `0` only where the material exposes the selected properties. Materials without matching properties are skipped.
